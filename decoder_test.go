@@ -138,6 +138,9 @@ func TestDecode(t *testing.T) {
 			},
 			"Maps": map[string]interface{}{
 				"type": "object",
+				"additionalProperties": map[string]interface{}{
+					"type": "string",
+				},
 			},
 			"Interface": map[string]interface{}{
 				"type": "",

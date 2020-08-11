@@ -34,6 +34,8 @@ type Property struct {
 
 	Properties map[string]*Property `json:"properties,omitempty"`
 
+	AdditionalProperties *Property `json:"additionalProperties,omitempty"`
+
 	Contains *Property `json:"contains,omitempty"`
 
 	Required []string `json:"required,omitempty"`
@@ -122,7 +124,7 @@ func decodeStructDoc(target FieldType, structs map[string]StructDoc, tagName str
 		if err != nil {
 			return nil, false, err
 		}
-		return p, true, nil
+		return p, false, nil
 	case *starFieldType:
 		p, _, err := decodeStructDoc(t.Value, structs, tagName)
 		if err != nil {
@@ -140,10 +142,15 @@ func decodeStructDoc(target FieldType, structs map[string]StructDoc, tagName str
 		}
 		return p, false, nil
 	case *mapFieldType:
-		// MEMO: Json Schema don't have enough object validation
-		return &Property{
+		p := &Property{
 			Type: Object,
-		}, false, nil
+		}
+		var err error
+		p.AdditionalProperties, _, err = decodeStructDoc(t.Value, structs, tagName)
+		if err != nil {
+			return nil, false, err
+		}
+		return p, false, nil
 	case *interfaceFieldType:
 		return &Property{
 			Type: Interface,
