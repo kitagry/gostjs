@@ -23,39 +23,60 @@ func TestParse(t *testing.T) {
 			Document: "Test's docs\n",
 			Fields: []Field{
 				{
-					Type:     "lowercase",
-					Required: true,
+					Type: &FieldType{
+						Name:     "lowercase",
+						Required: true,
+					},
 				},
 				{
-					Name:     "Name",
-					Required: true,
-					Type:     "string",
+					Name: "Name",
+					Type: &FieldType{
+						Name:     "string",
+						Required: true,
+					},
 					Document: "Name is name\n",
 					Tags: map[string]string{
 						"json": "name",
 					},
 				},
 				{
-					Name:     "ID",
-					Required: true,
-					Type:     "int",
+					Name: "ID",
+					Type: &FieldType{
+						Name:     "int",
+						Required: true,
+					},
 					Tags: map[string]string{
 						"json": "id",
 						"yaml": "id",
 					},
 				},
 				{
-					Name:     "Child",
-					Required: true,
-					Type:     "Child",
+					Name: "Array",
+					Type: &FieldType{
+						Name:     "string",
+						Required: true,
+						IsArray:  true,
+					},
+					Tags: map[string]string{
+						"json": "array",
+					},
+				},
+				{
+					Name: "Child",
+					Type: &FieldType{
+						Name:     "Child",
+						Required: true,
+					},
 					Tags: map[string]string{
 						"json": "child",
 					},
 				},
 				{
-					Name:     "Child2",
-					Required: false,
-					Type:     "Child",
+					Name: "Child2",
+					Type: &FieldType{
+						Name:     "Child",
+						Required: false,
+					},
 				},
 			},
 		},
@@ -64,9 +85,11 @@ func TestParse(t *testing.T) {
 			Document: "Child is Test's child\n",
 			Fields: []Field{
 				{
-					Name:     "Name",
-					Required: true,
-					Type:     "string",
+					Name: "Name",
+					Type: &FieldType{
+						Name:     "string",
+						Required: true,
+					},
 				},
 			},
 		},
@@ -74,9 +97,11 @@ func TestParse(t *testing.T) {
 			Name: "lowercase",
 			Fields: []Field{
 				{
-					Name:     "Name",
-					Required: true,
-					Type:     "string",
+					Name: "Name",
+					Type: &FieldType{
+						Name:     "string",
+						Required: true,
+					},
 				},
 			},
 		},

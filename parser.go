@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/fatih/structtag"
@@ -22,21 +23,40 @@ type StructDoc struct {
 
 type Field struct {
 	Name     string
-	Required bool
-	Type     string
+	Type     *FieldType
 	Document string
 	Tags     map[string]string
 }
 
-func getExprString(expr ast.Expr) (ty string, required bool) {
+type FieldType struct {
+	Name     string
+	IsArray  bool
+	Required bool
+}
+
+func getFieldType(expr ast.Expr) (*FieldType, error) {
 	switch t := expr.(type) {
 	case *ast.Ident:
-		return t.Name, true
+		return &FieldType{
+			Name:     t.Name,
+			Required: true,
+		}, nil
 	case *ast.StarExpr:
-		ty, _ = getExprString(t.X)
-		return ty, false
+		ty, err := getFieldType(t.X)
+		if err != nil {
+			return nil, err
+		}
+		ty.Required = false
+		return ty, nil
+	case *ast.ArrayType:
+		ty, err := getFieldType(t.Elt)
+		if err != nil {
+			return nil, err
+		}
+		ty.IsArray = true
+		return ty, nil
 	default:
-		return "", false
+		return nil, fmt.Errorf("Unimplemented expr type: %s", reflect.TypeOf(expr))
 	}
 }
 
@@ -46,9 +66,13 @@ func parseField(l *ast.Field) (Field, error) {
 	if len(l.Names) == 1 {
 		field.Name = l.Names[0].String()
 	}
-
-	field.Type, field.Required = getExprString(l.Type)
 	field.Document = l.Doc.Text()
+
+	var err error
+	field.Type, err = getFieldType(l.Type)
+	if err != nil {
+		return field, xerrors.Errorf("failed to get FieldType: %w", err)
+	}
 
 	if l.Tag == nil || len(l.Tag.Value) == 0 {
 		return field, nil
