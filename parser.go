@@ -22,19 +22,21 @@ type StructDoc struct {
 
 type Field struct {
 	Name     string
+	Required bool
 	Type     string
 	Document string
 	Tags     map[string]string
 }
 
-func getExprString(expr ast.Expr) string {
+func getExprString(expr ast.Expr) (ty string, required bool) {
 	switch t := expr.(type) {
 	case *ast.Ident:
-		return t.Name
+		return t.Name, true
 	case *ast.StarExpr:
-		return "*" + getExprString(t.X)
+		ty, _ = getExprString(t.X)
+		return ty, false
 	default:
-		return ""
+		return "", false
 	}
 }
 
@@ -45,7 +47,7 @@ func parseField(l *ast.Field) (Field, error) {
 		field.Name = l.Names[0].String()
 	}
 
-	field.Type = getExprString(l.Type)
+	field.Type, field.Required = getExprString(l.Type)
 	field.Document = l.Doc.Text()
 
 	if l.Tag == nil || len(l.Tag.Value) == 0 {

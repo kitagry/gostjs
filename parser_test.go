@@ -23,10 +23,12 @@ func TestParse(t *testing.T) {
 			Document: "Test's docs\n",
 			Fields: []Field{
 				{
-					Type: "lowercase",
+					Type:     "lowercase",
+					Required: true,
 				},
 				{
 					Name:     "Name",
+					Required: true,
 					Type:     "string",
 					Document: "Name is name\n",
 					Tags: map[string]string{
@@ -34,23 +36,26 @@ func TestParse(t *testing.T) {
 					},
 				},
 				{
-					Name: "ID",
-					Type: "int",
+					Name:     "ID",
+					Required: true,
+					Type:     "int",
 					Tags: map[string]string{
 						"json": "id",
 						"yaml": "id",
 					},
 				},
 				{
-					Name: "Child",
-					Type: "Child",
+					Name:     "Child",
+					Required: true,
+					Type:     "Child",
 					Tags: map[string]string{
 						"json": "child",
 					},
 				},
 				{
-					Name: "Child2",
-					Type: "*Child",
+					Name:     "Child2",
+					Required: false,
+					Type:     "Child",
 				},
 			},
 		},
@@ -59,8 +64,9 @@ func TestParse(t *testing.T) {
 			Document: "Child is Test's child\n",
 			Fields: []Field{
 				{
-					Name: "Name",
-					Type: "string",
+					Name:     "Name",
+					Required: true,
+					Type:     "string",
 				},
 			},
 		},
@@ -68,14 +74,15 @@ func TestParse(t *testing.T) {
 			Name: "lowercase",
 			Fields: []Field{
 				{
-					Name: "Name",
-					Type: "string",
+					Name:     "Name",
+					Required: true,
+					Type:     "string",
 				},
 			},
 		},
 	}
 
 	if !reflect.DeepEqual(nameToDoc, expected) {
-		t.Errorf("expected %+v, got %+v", expected, nameToDoc)
+		t.Errorf("expected:\n%+v\ngot:\n%+v", expected, nameToDoc)
 	}
 }
