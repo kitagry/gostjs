@@ -12,7 +12,7 @@ func TestParse(t *testing.T) {
 		t.Fatalf("failed to get pwd: %v", err)
 	}
 
-	nameToDoc, err := Parse("github.com/kitagry/gojs/test", pwd)
+	nameToDoc, err := Parse("github.com/kitagry/gostjs/test", pwd)
 	if err != nil {
 		t.Fatalf("failed to Parse: %v", err)
 	}
