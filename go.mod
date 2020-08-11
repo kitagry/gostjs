@@ -1,4 +1,4 @@
-module github.com/kitagry/gojs
+module github.com/kitagry/gostjs
 
 go 1.13
 
