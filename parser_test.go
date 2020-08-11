@@ -23,16 +23,14 @@ func TestParse(t *testing.T) {
 			Document: "Test's docs\n",
 			Fields: []Field{
 				{
-					Type: &FieldType{
-						Name:     "lowercase",
-						Required: true,
+					Type: &basicFieldType{
+						Name: "lowercase",
 					},
 				},
 				{
 					Name: "Name",
-					Type: &FieldType{
-						Name:     "string",
-						Required: true,
+					Type: &basicFieldType{
+						Name: "string",
 					},
 					Document: "Name is name\n",
 					Tags: map[string]string{
@@ -41,9 +39,8 @@ func TestParse(t *testing.T) {
 				},
 				{
 					Name: "ID",
-					Type: &FieldType{
-						Name:     "int",
-						Required: true,
+					Type: &basicFieldType{
+						Name: "int",
 					},
 					Tags: map[string]string{
 						"json": "id",
@@ -52,20 +49,41 @@ func TestParse(t *testing.T) {
 				},
 				{
 					Name: "Array",
-					Type: &FieldType{
-						Name:     "string",
-						Required: true,
-						IsArray:  true,
+					Type: &arrayFieldType{
+						Value: &basicFieldType{
+							Name: "string",
+						},
 					},
 					Tags: map[string]string{
 						"json": "array",
 					},
 				},
 				{
+					Name: "Map",
+					Type: &mapFieldType{
+						Key: &basicFieldType{
+							Name: "string",
+						},
+						Value: &basicFieldType{
+							Name: "string",
+						},
+					},
+					Tags: map[string]string{
+						"json": "map",
+					},
+				},
+				{
+					Name: "Selector",
+					Type: &unknownFieldType{},
+				},
+				{
+					Name: "Interface",
+					Type: &interfaceFieldType{},
+				},
+				{
 					Name: "Child",
-					Type: &FieldType{
-						Name:     "Child",
-						Required: true,
+					Type: &basicFieldType{
+						Name: "Child",
 					},
 					Tags: map[string]string{
 						"json": "child",
@@ -73,9 +91,10 @@ func TestParse(t *testing.T) {
 				},
 				{
 					Name: "Child2",
-					Type: &FieldType{
-						Name:     "Child",
-						Required: false,
+					Type: &starFieldType{
+						&basicFieldType{
+							Name: "Child",
+						},
 					},
 				},
 			},
@@ -86,9 +105,8 @@ func TestParse(t *testing.T) {
 			Fields: []Field{
 				{
 					Name: "Name",
-					Type: &FieldType{
-						Name:     "string",
-						Required: true,
+					Type: &basicFieldType{
+						Name: "string",
 					},
 				},
 			},
@@ -98,9 +116,8 @@ func TestParse(t *testing.T) {
 			Fields: []Field{
 				{
 					Name: "Name",
-					Type: &FieldType{
-						Name:     "string",
-						Required: true,
+					Type: &basicFieldType{
+						Name: "string",
 					},
 				},
 			},

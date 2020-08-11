@@ -14,9 +14,8 @@ var parsedObj = map[string]StructDoc{
 			{
 				Name:     "Name",
 				Document: "Name's document\n",
-				Type: &FieldType{
-					Name:     "string",
-					Required: true,
+				Type: &basicFieldType{
+					Name: "string",
 				},
 				Tags: map[string]string{
 					"json": "name",
@@ -24,14 +23,18 @@ var parsedObj = map[string]StructDoc{
 			},
 			{
 				Name: "ID",
-				Type: &FieldType{
-					Name: "int",
+				Type: &starFieldType{
+					Value: &basicFieldType{
+						Name: "int",
+					},
 				},
 			},
 			{
 				Name: "Score",
-				Type: &FieldType{
-					Name: "float64",
+				Type: &starFieldType{
+					Value: &basicFieldType{
+						Name: "float64",
+					},
 				},
 				Tags: map[string]string{
 					"json": "score",
@@ -39,21 +42,41 @@ var parsedObj = map[string]StructDoc{
 			},
 			{
 				Name: "IsBool",
-				Type: &FieldType{
-					Name: "boolean",
+				Type: &starFieldType{
+					Value: &basicFieldType{
+						Name: "boolean",
+					},
 				},
 			},
 			{
 				Name: "Strings",
-				Type: &FieldType{
-					Name:    "string",
-					IsArray: true,
+				Type: &arrayFieldType{
+					Value: &basicFieldType{
+						Name: "string",
+					},
 				},
 			},
 			{
+				Name: "Maps",
+				Type: &mapFieldType{
+					Key: &basicFieldType{
+						Name: "string",
+					},
+					Value: &basicFieldType{
+						Name: "string",
+					},
+				},
+			},
+			{
+				Name: "Interface",
+				Type: &interfaceFieldType{},
+			},
+			{
 				Name: "Child",
-				Type: &FieldType{
-					Name: "Child",
+				Type: &starFieldType{
+					Value: &basicFieldType{
+						Name: "Child",
+					},
 				},
 				Tags: map[string]string{
 					"json": "child",
@@ -66,9 +89,8 @@ var parsedObj = map[string]StructDoc{
 		Fields: []Field{
 			{
 				Name: "Name",
-				Type: &FieldType{
-					Name:     "string",
-					Required: true,
+				Type: &basicFieldType{
+					Name: "string",
 				},
 				Tags: map[string]string{
 					"json": "name",
@@ -113,6 +135,12 @@ func TestDecode(t *testing.T) {
 				"contains": map[string]interface{}{
 					"type": "string",
 				},
+			},
+			"Maps": map[string]interface{}{
+				"type": "object",
+			},
+			"Interface": map[string]interface{}{
+				"type": "",
 			},
 			"child": map[string]interface{}{
 				"type": "object",

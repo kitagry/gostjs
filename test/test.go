@@ -1,5 +1,7 @@
 package test
 
+import "log"
+
 // Test's docs
 type Test struct {
 	lowercase
@@ -10,6 +12,12 @@ type Test struct {
 	ID int `json:"id" yaml:"id"`
 
 	Array []string `json:"array"`
+
+	Map map[string]string `json:"map"`
+
+	Selector log.Logger
+
+	Interface interface{}
 
 	Child Child `json:"child"`
 

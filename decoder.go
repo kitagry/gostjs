@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"golang.org/x/xerrors"
 )
@@ -16,6 +17,8 @@ const (
 	Array        = "array"
 	Boolean      = "boolean"
 	Null         = "null"
+
+	Interface = ""
 )
 
 type Schema struct {
@@ -36,21 +39,29 @@ type Property struct {
 	Required []string `json:"required,omitempty"`
 }
 
-func nameFromTag(field Field, tag string) string {
+func nameFromTag(field Field, tag string) (string, bool) {
 	if tag == "" {
-		return field.Name
+		return field.Name, false
 	}
 
 	name, ok := field.Tags[tag]
 	if !ok {
-		return field.Name
+		return field.Name, false
 	}
-	return name
+
+	if name == "-" {
+		return "", true
+	}
+
+	if strings.Index(name, ",") != -1 {
+		name = strings.Split(name, ",")[0]
+	}
+	return name, false
 }
 
 func decodeFromName(target string, structs map[string]StructDoc, tagName string) (*Property, error) {
 	switch target {
-	case "boolean":
+	case "bool":
 		return &Property{
 			Type: Boolean,
 		}, nil
@@ -70,6 +81,10 @@ func decodeFromName(target string, structs map[string]StructDoc, tagName string)
 		return &Property{
 			Type: Number,
 		}, nil
+	case "interface":
+		return &Property{
+			Type: Interface,
+		}, nil
 	default:
 		st, ok := structs[target]
 		if !ok {
@@ -82,14 +97,17 @@ func decodeFromName(target string, structs map[string]StructDoc, tagName string)
 			Required:    make([]string, 0),
 		}
 		for _, s := range st.Fields {
-			property, err := decodeStructDoc(s.Type, structs, tagName)
-			if err != nil {
+			name, skip := nameFromTag(s, tagName)
+			if skip {
 				continue
 			}
+			property, required, err := decodeStructDoc(s.Type, structs, tagName)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decodeStructDoc: %v", err)
+			}
 			property.Description = s.Document
-			name := nameFromTag(s, tagName)
 			p.Properties[name] = property
-			if s.Type.Required {
+			if required {
 				p.Required = append(p.Required, name)
 			}
 		}
@@ -97,25 +115,48 @@ func decodeFromName(target string, structs map[string]StructDoc, tagName string)
 	}
 }
 
-func decodeStructDoc(target *FieldType, structs map[string]StructDoc, tagName string) (*Property, error) {
-	if target.IsArray {
+func decodeStructDoc(target FieldType, structs map[string]StructDoc, tagName string) (*Property, bool, error) {
+	switch t := target.(type) {
+	case *basicFieldType:
+		p, err := decodeFromName(t.Name, structs, tagName)
+		if err != nil {
+			return nil, false, err
+		}
+		return p, true, nil
+	case *starFieldType:
+		p, _, err := decodeStructDoc(t.Value, structs, tagName)
+		if err != nil {
+			return nil, false, err
+		}
+		return p, false, nil
+	case *arrayFieldType:
 		p := &Property{
 			Type: Array,
 		}
 		var err error
-		p.Contains, err = decodeFromName(target.Name, structs, tagName)
+		p.Contains, _, err = decodeStructDoc(t.Value, structs, tagName)
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
-		return p, nil
+		return p, false, nil
+	case *mapFieldType:
+		// MEMO: Json Schema don't have enough object validation
+		return &Property{
+			Type: Object,
+		}, false, nil
+	case *interfaceFieldType:
+		return &Property{
+			Type: Interface,
+		}, false, nil
+	default:
+		return nil, false, fmt.Errorf("Unexpected decode fieldType")
 	}
-	return decodeFromName(target.Name, structs, tagName)
 }
 
 func Decode(target string, structs map[string]StructDoc, tagName string) ([]byte, error) {
 	property, err := decodeFromName(target, structs, tagName)
 	if err != nil {
-		return []byte{}, xerrors.Errorf("failed to decodeStructDoc: %w", err)
+		return []byte{}, xerrors.Errorf("failed to decodeFromName: %w", err)
 	}
 
 	schema := Schema{Property: property, Schema: "http://json-schema.org/schema#"}
