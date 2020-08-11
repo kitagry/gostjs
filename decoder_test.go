@@ -44,7 +44,7 @@ var parsedObj = map[string]StructDoc{
 				Name: "IsBool",
 				Type: &starFieldType{
 					Value: &basicFieldType{
-						Name: "boolean",
+						Name: "bool",
 					},
 				},
 			},
