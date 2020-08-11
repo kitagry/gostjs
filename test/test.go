@@ -9,6 +9,8 @@ type Test struct {
 
 	ID int `json:"id" yaml:"id"`
 
+	Array []string `json:"array"`
+
 	Child Child `json:"child"`
 
 	Child2 *Child

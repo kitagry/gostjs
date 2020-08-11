@@ -13,27 +13,48 @@ var parsedObj = map[string]StructDoc{
 		Fields: []Field{
 			{
 				Name:     "Name",
-				Required: true,
 				Document: "Name's document\n",
-				Type:     "string",
+				Type: &FieldType{
+					Name:     "string",
+					Required: true,
+				},
 				Tags: map[string]string{
 					"json": "name",
 				},
 			},
 			{
 				Name: "ID",
-				Type: "int",
+				Type: &FieldType{
+					Name: "int",
+				},
 			},
 			{
 				Name: "Score",
-				Type: "float64",
+				Type: &FieldType{
+					Name: "float64",
+				},
 				Tags: map[string]string{
 					"json": "score",
 				},
 			},
 			{
+				Name: "IsBool",
+				Type: &FieldType{
+					Name: "boolean",
+				},
+			},
+			{
+				Name: "Strings",
+				Type: &FieldType{
+					Name:    "string",
+					IsArray: true,
+				},
+			},
+			{
 				Name: "Child",
-				Type: "Child",
+				Type: &FieldType{
+					Name: "Child",
+				},
 				Tags: map[string]string{
 					"json": "child",
 				},
@@ -44,9 +65,11 @@ var parsedObj = map[string]StructDoc{
 		Name: "Child",
 		Fields: []Field{
 			{
-				Name:     "Name",
-				Required: true,
-				Type:     "string",
+				Name: "Name",
+				Type: &FieldType{
+					Name:     "string",
+					Required: true,
+				},
 				Tags: map[string]string{
 					"json": "name",
 				},
@@ -81,6 +104,15 @@ func TestDecode(t *testing.T) {
 			},
 			"score": map[string]interface{}{
 				"type": "number",
+			},
+			"IsBool": map[string]interface{}{
+				"type": "boolean",
+			},
+			"Strings": map[string]interface{}{
+				"type": "array",
+				"contains": map[string]interface{}{
+					"type": "string",
+				},
 			},
 			"child": map[string]interface{}{
 				"type": "object",

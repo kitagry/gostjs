@@ -31,6 +31,8 @@ type Property struct {
 
 	Properties map[string]*Property `json:"properties,omitempty"`
 
+	Contains *Property `json:"contains,omitempty"`
+
 	Required []string `json:"required,omitempty"`
 }
 
@@ -46,8 +48,12 @@ func nameFromTag(field Field, tag string) string {
 	return name
 }
 
-func decodeStructDoc(target string, structs map[string]StructDoc, tagName string) (*Property, error) {
+func decodeFromName(target string, structs map[string]StructDoc, tagName string) (*Property, error) {
 	switch target {
+	case "boolean":
+		return &Property{
+			Type: Boolean,
+		}, nil
 	case "string":
 		return &Property{
 			Type: String,
@@ -83,7 +89,7 @@ func decodeStructDoc(target string, structs map[string]StructDoc, tagName string
 			property.Description = s.Document
 			name := nameFromTag(s, tagName)
 			p.Properties[name] = property
-			if s.Required {
+			if s.Type.Required {
 				p.Required = append(p.Required, name)
 			}
 		}
@@ -91,8 +97,23 @@ func decodeStructDoc(target string, structs map[string]StructDoc, tagName string
 	}
 }
 
+func decodeStructDoc(target *FieldType, structs map[string]StructDoc, tagName string) (*Property, error) {
+	if target.IsArray {
+		p := &Property{
+			Type: Array,
+		}
+		var err error
+		p.Contains, err = decodeFromName(target.Name, structs, tagName)
+		if err != nil {
+			return nil, err
+		}
+		return p, nil
+	}
+	return decodeFromName(target.Name, structs, tagName)
+}
+
 func Decode(target string, structs map[string]StructDoc, tagName string) ([]byte, error) {
-	property, err := decodeStructDoc(target, structs, tagName)
+	property, err := decodeFromName(target, structs, tagName)
 	if err != nil {
 		return []byte{}, xerrors.Errorf("failed to decodeStructDoc: %w", err)
 	}
