@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"golang.org/x/xerrors"
@@ -155,8 +156,13 @@ func decodeStructDoc(target FieldType, structs map[string]StructDoc, tagName str
 		return &Property{
 			Type: Interface,
 		}, false, nil
+	case *unknownFieldType:
+		// TODO: Should parse different File's struct
+		return &Property{
+			Type: Interface,
+		}, false, nil
 	default:
-		return nil, false, fmt.Errorf("Unexpected decode fieldType")
+		return nil, false, fmt.Errorf("Unexpected decode fieldType: %s", reflect.TypeOf(target))
 	}
 }
 

@@ -15,7 +15,7 @@ type Test struct {
 
 	Map map[string]string `json:"map"`
 
-	Selector log.Logger
+	selector log.Logger
 
 	Interface interface{}
 
